@@ -1,6 +1,10 @@
 <h1 align='center'>💻 Sobre o projeto</h1>
 <p align='center'>Repositório criado como forma de trabalho para as disciplinas do 4º período do curso de Análise e Desenvolvimento de Sistemas - IFTM - Campus Ituiutaba/MG </p>
 
+<h4 align="center"> 
+	🚧  Em construção... ainda há melhorias sendo implementadas 🚧
+</h4>
+
 ## 🚀 Tecnologias
 
 - ⚡ Express — A web framework for Node.js

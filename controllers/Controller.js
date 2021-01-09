@@ -2,7 +2,6 @@ const express = require ('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const models = require('../models');
-const fetch = require('node-fetch');
 
 
 const app = express ();
@@ -13,8 +12,7 @@ let user = models.User;
 let favorite = models.Favorite;
  
 
-
-let port = process.env.PORT || 3000;
+let port = process.env.PORT || 3333;
 app.listen(port, (req, res)=>{
     console.log('Servidor rodando');
 });
@@ -34,7 +32,7 @@ app.post('/login',async (req, res)=>{
 
 app.post('/createAccount',async (req, res)=>{
 
-    const createNewUser = await user.findOrCreate({
+    const createNewUser = await user.create({
         email: req.body.email,
         password: req.body.email,
         createdAt: new Date(),
@@ -47,7 +45,7 @@ app.post('/createAccount',async (req, res)=>{
 
 app.post('/addFavoriteShow', async(req, res)=>{   
 
-    const showId = req.body.showId;
+    const showId = req.body.id;
     const userId = req.body.userId;
 
     const userLogged = await user.findByPk(userId);
@@ -61,28 +59,27 @@ app.post('/addFavoriteShow', async(req, res)=>{
     });
     await userLogged.addFavorite(favoriteId);
 
-    return res.json(favoriteId)
-
+    return res.json(favoriteId);
 
 });
 
-app.post('/getIsFavorite', async(req, res)=>{   
+app.get('/getIsFavorite', async(req, res)=>{   
 
-    const userId = req.body.userId;
-
-    const userLogged = await user.findByPk(userId,{
+    const { user_id } = req.headers;
+    const userLogged = await user.findByPk(user_id,{
         include: { association: 'favorite'}
     });
     return res.json(userLogged.favorite)
 });
 
 
-app.post('/deleteFavoriteShow', async(req, res)=>{   
+app.delete('/deleteFavoriteShow', async(req, res)=>{  
 
-    const showId = req.body.showId;
-    const userId = req.body.userId;
+    const userId = req.headers.authorization;
+    const showId = req.headers.data;
 
     const userLogged = await user.findByPk(userId);
+
 
     if (!userLogged){
         return res.status(400).json({ error: 'User not found'})
@@ -95,26 +92,3 @@ app.post('/deleteFavoriteShow', async(req, res)=>{
     await favoritedShow.destroy();
 });
 
-app.post('/getFavoriteShow', async(req, res)=>{   
-
-    const showId = req.body.showId;
-    fetch(`http://api.tvmaze.com/shows/${showId}`)
-    .then( (response) => response.json())
-    .then( (jsonData) => res.send(jsonData))
-    .catch( (error) => res.send(JSON.stringify('error')));    
-})
-
-app.get('/getShows', async(req, res)=>{   
-    fetch(`http://api.tvmaze.com/shows`)
-    .then( (response) => response.json())
-    .then( (jsonData) => res.send(jsonData))
-    .catch( (error) => res.send(JSON.stringify('error')));    
-});
-
-app.post('/searchShows', async(req, res)=>{   
-    const show = req.body.show;
-    fetch(`http://api.tvmaze.com/search/shows?q=${show}`)
-    .then( (response) => response.json())
-    .then( (jsonData) => res.send(jsonData))
-    .catch( (error) => res.send(JSON.stringify('error')));    
-})
